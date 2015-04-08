@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Filename: git-noisy-checkout
+# Author  : Gaurav Kharkwal
+# Email   : gaurav.kharkwal@gmail.com
+# Date    : 20150407
+# 
+# About: 
+#  Expects a branch name as an argument, and checks it out. 
+#  Subsequently, "notifies" by calling the helper python script.
+#
+# NB: Make sure to update the git-completion.bash to handle this script.
+# Simply copying the function used for checkout should suffice.
+
+LISTENER_PATH="/Users/kharkwal/repos/git-scripts/noisy-checkout-listener.py"
+
+# Check if we are in a git repository
+if ! git branch > /dev/null 2>&1
+then
+    echo "fatal: '$(basename ${PWD})' is not a git repository."
+    exit 1
+fi
+
+# Checkout 
+if ! git checkout $1 > /dev/null 2>&1
+then
+    echo "error: '$1' is not a valid branch for this repository."
+    exit 1
+fi
+
+# Notify
+branch="$1"
+repo="$(basename `git rev-parse --show-toplevel`)"
+if ! python $LISTENER_PATH $repo $branch
+then
+    echo "error: Unable to update repository information"
+    exit 1
+fi
+
