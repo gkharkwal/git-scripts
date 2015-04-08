@@ -21,15 +21,14 @@ then
     exit 1
 fi
 
-# Checkout 
-if ! git checkout $1 > /dev/null 2>&1
+# Checkout
+if ! git checkout $@
 then
-    echo "error: '$1' is not a valid branch for this repository."
     exit 1
 fi
 
 # Notify
-branch="$1"
+branch="$(git branch | awk '/^\* / { print $2 }')"
 repo="$(basename `git rev-parse --show-toplevel`)"
 if ! python $LISTENER_PATH $repo $branch
 then
